@@ -10,77 +10,55 @@ const lancamentos = [
     { "mes": "mar-24", "categoria": "Lazer", "valor": 400.00 }
 ];
 
-// Dispara a montagem do gráfico após o carregamento da página.
 window.onload = () => {
     apresentarGrafico(lancamentos);
 }
 
 function apresentarGrafico(dados) {
     // Vamos preparar os dados dos lançamentos para a exibição no gráfico.
-    // Para isso, precisamos agrupar os lançamentos por categoria a cada mês.
+    // Para isso, precisamos agrupar os lançamentos por categoria.
 
-    // Primeiro vamos criar dois arrays com os meses e as categorias 
-    // de forma única. Para isso vamos utilizar uma estrutura do JavaScript
+    // Primeiro, vamos criar um array com a lista de categorias de forma única.
+    // Para isso, vamos utilizar uma estrutura do JavaScript
     // denominada Set (Conjunto). Ao criar o Set a partir de um array, 
     // ele tira as duplicidades. 
-    const meses = Array.from(new Set(dados.map(objeto => objeto.mes)));
     const categorias = Array.from(new Set(dados.map(objeto => objeto.categoria)));
 
-    // Agora vamos consolidar todos os lancamentos por categoria e por mes
-    // para isso, vamos passar em cada mês e totalizar os lançamentos por categorias
-    const dadosPorMes = meses.map(mes => {
-        const valoresPorCategoria = categorias.map(categoria => {
-            const valor = dados.filter(obj => obj.mes === mes && obj.categoria === categoria)
-                .reduce((acumulador, objetoCorrente) => acumulador + objetoCorrente.valor, 0);
-            return valor;
-        });
-        return {
-            mes: mes,
-            valores: valoresPorCategoria
-        };
+    // Agora vamos consolidar todos os lancamentos por categoria.
+    // Para isso, vamos passar em cada categoria e totalizar os lançamentos 
+    const valoresPorCategoria = categorias.map(categoria => {
+        const valorTotal = dados.filter(objeto => objeto.categoria === categoria)
+            .reduce((acumulador, obj) => acumulador + obj.valor, 0);
+        return valorTotal;
     });
-
-    // Monta o gráfico, utilizando a API do Chart.js,
-
-    // Define um conjunto de cores para as séries do gráfico
-    const cores = [
-        'rgba(255, 99, 132, 0.5)',
-        'rgba(54, 162, 235, 0.5)',
-        'rgba(255, 206, 86, 0.5)',
-        'rgba(75, 192, 192, 0.5)',
-        'rgba(153, 102, 255, 0.5)',
-        'rgba(255, 159, 64, 0.5)'
-    ];
 
     // Obtem o elemento DIV da página que vai receber o gráfico
     const contexto = document.getElementById('grafico');
 
     // Cria o objeto do gráfico passando os parâmetros
-    const divBarChart = new Chart(contexto, {
-        type: 'bar',
+    const grafico = new Chart(contexto, {
+        type: 'pie',
         data: {
-            labels: meses,
-            datasets: categorias.map((categoria, indice) => {
-                return {
-                    label: categoria,
-                    data: dadosPorMes.map(item => item.valores[indice]),
-                    backgroundColor: cores[indice],
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                };
-            })
+            labels: categorias,
+            datasets: [{
+                data: valoresPorCategoria,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.5)',
+                    'rgba(54, 162, 235, 0.5)',
+                    'rgba(255, 206, 86, 0.5)',
+                    'rgba(75, 192, 192, 0.5)',
+                    'rgba(153, 102, 255, 0.5)',
+                    'rgba(255, 159, 64, 0.5)'
+                ],
+                borderColor: [
+                    'rgba(255, 255, 2555, 1)'
+                ],
+                borderWidth: 3
+            }]
         },
         options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    stacked: true
-                },
-                x: {
-                    stacked: true
-                }
-            }
+            responsive: false,
+            maintainAspectRatio: false
         }
     });
 }
-
